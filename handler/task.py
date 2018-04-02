@@ -10,7 +10,7 @@ from common import tool
 from common import config
 
 @app.route('/v1/api/task/data/submit', methods=['POST'])
-def task_submit():
+def task_data_submit():
 	token = request.headers.get('X-Token')
 	if not tool.check_token_valid(token):
 		result = {'code': 1002, 'msg': 'token invalid or expired'}
@@ -30,7 +30,7 @@ def task_submit():
 		return jsonify(result)
 
 @app.route('/v1/api/task/file/submit', methods=['POST'])
-def task_submit():
+def task_file_submit():
 	token = request.headers.get('X-Token')
 	if not tool.check_token_valid(token):
 		result = {'code': 1002, 'msg': 'token invalid or expired'}
