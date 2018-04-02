@@ -9,7 +9,7 @@ from flask import request, jsonify
 from common import tool
 from common import config
 
-@app.route('/v1/api/task/submit', methods=['POST'])
+@app.route('/v1/api/task/data/submit', methods=['POST'])
 def task_submit():
 	token = request.headers.get('X-Token')
 	if not tool.check_token_valid(token):
@@ -18,6 +18,26 @@ def task_submit():
 	task_data = request.get_json()
 	if not task_data or not task_data['records']:
 		result = {'code': 3001, 'msg': 'data format not correct'}
+		return jsonify(result)
+	task_id = tool.generate_task_id()
+	config.tasks[task_id] = {'token': token, 'status': 'wait'}
+	ok = tool.save_task_data(task_id, task_data)
+	if not ok:
+		result = {'code': -1, 'msg': 'save task data fail'}
+		return jsonify(result)
+	else:
+		result = {'code': 0, 'msg': 'ok', 'task_id': task_id}
+		return jsonify(result)
+
+@app.route('/v1/api/task/file/submit', methods=['POST'])
+def task_submit():
+	token = request.headers.get('X-Token')
+	if not tool.check_token_valid(token):
+		result = {'code': 1002, 'msg': 'token invalid or expired'}
+		return jsonify(result)
+	task_data = request.get_json()
+	if not task_data or not task_data['file_url']:
+		result = {'code': 3001, 'msg': 'file url not correct'}
 		return jsonify(result)
 	task_id = tool.generate_task_id()
 	config.tasks[task_id] = {'token': token, 'status': 'wait'}
