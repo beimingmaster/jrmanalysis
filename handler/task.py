@@ -21,7 +21,7 @@ def task_data_submit():
         return jsonify(result)
     task_id = tool.generate_task_id()
     config.tasks[task_id] = {'token': token, 'status': 0}
-    ok = tool.save_task_data(task_id, task_data)
+    ok = tool.save_task_data(task_id, task_data, 'data.json')
     if not ok:
         result = {'code': -1, 'msg': 'save task data fail'}
         return jsonify(result)
@@ -41,7 +41,7 @@ def task_file_submit():
         return jsonify(result)
     task_id = tool.generate_task_id()
     config.tasks[task_id] = {'token': token, 'status': 0}
-    ok = tool.save_task_data(task_id, task_data)
+    ok = tool.save_task_data(task_id, task_data, 'url.json')
     if not ok:
         result = {'code': -1, 'msg': 'save task data fail'}
         return jsonify(result)
@@ -81,11 +81,11 @@ def get_task_result():
         return jsonify(result)
     else:
         task_status = config.tasks[task_id]['status']
-        if task_status not in ['failed', 'finished']:
+        if task_status not in [-1, 1]:
             result = {'code': -1, 'msg': 'task not completed'}
             return jsonify(result)
         else:
-            task_result_file = '../data/%s/result.json' % task_id
+            task_result_file = '%s/%s/result.json' % (config.data_path, task_id)
             if not os.path.exists(task_result_file):
                 result = {'code': -1, 'msg': 'task result file not exist'}  
                 return jsonify(result)

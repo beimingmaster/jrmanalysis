@@ -23,11 +23,11 @@ def generate_task_id():
 	task_id = 'task_%s' % (md5(task_id.encode('utf-8')).hexdigest())
 	return task_id
 
-def save_task_data(task_id, task_data):
-	task_path = '../data/%s' % task_id
+def save_task_data(task_id, task_data, task_file='data.json'):
+	task_path = '%s/%s' % (config.data_path, task_id)
 	if not os.path.exists(task_path):
-		os.mkdir(task_path)
+		os.makedirs(task_path)
 	task_json = json.dumps(task_data)
-	with open('%s/%s' % (task_path, 'data.json'), 'w', encoding='utf8') as f:
+	with open('%s/%s' % (task_path, task_file), 'w', encoding='utf8') as f:
 		f.write(task_json)
 	return True

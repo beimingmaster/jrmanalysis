@@ -18,11 +18,18 @@ from common import config
 
 def do_mixed(task_id):
     print('do mixed work for task id: %s ...' % task_id)
+    start = time.time()
     download_cmd.do_download(task_id)
+    end = time.time()
+    print('do download takes %.2fs' % (end-start))
+    start = end
     analysis_cmd.do_analysis(task_id)
+    end = time.time()
+    print('do analysis takes %.2fs' % (end-start))
 
 def get_wait_task():
-    wait_url = '%s/v1/api/task/wait' % config.api_url
+    wait_url = '%s/v1/api/task/wait?token=%s' % (config.api_url, config.admin_token)
+    print('task wait url: ', wait_url)
     try:
         r = requests.get(wait_url, timeout=10)
         if r.status_code == 200:
@@ -32,12 +39,13 @@ def get_wait_task():
         return None
 
 def change_task_status(task_id, task_status):
-    change_url = '%s/v1/api/task/status' % config.api_url
+    change_url = '%s/v1/api/task/status?token=%s' % (config.api_url, config.admin_token)
+    print('task status change url: ', change_url)
     result_json_file = '../data/%s/result.json' % task_id
     if os.path.exists(result_json_file):
         try:
             data = {'task_id': task_id, 'task_status': task_status}
-            r = request.post(change_url, data=data)
+            r = requests.post(change_url, json=data)
             if r.status_code == 200:
                 return True
         except Exception as ex:
@@ -54,6 +62,7 @@ if __name__ == '__main__':
     wait_task = False
     if task_id == 'wait':
         wait_task = True
+        task_id = None
         print('get wait task ...')
         task = get_wait_task()
         if task and 'task_id' in task:

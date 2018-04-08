@@ -11,6 +11,8 @@ import pandas as pd
 from geopy.distance import vincenty
 from optparse import OptionParser
 
+from common import config
+
 class CarRecordAnalysis(object):
     def __init__(self, task_id):
         self.task_id = task_id
@@ -26,7 +28,7 @@ class CarRecordAnalysis(object):
     
     def doPrepare(self):
         print('do prepare data ...')
-        task_data_file = '../data/%s/data.json' % self.task_id
+        task_data_file = '%s/%s/data.json' % (config.data_path, self.task_id)
         with open(task_data_file, 'r') as f:
             data = json.load(f)
             if data:
@@ -160,11 +162,29 @@ class CarRecordAnalysis(object):
 
     def doFinish(self):
         print('do finish for task: %s' % self.task_id)
-        task_result_file = '../data/%s/result.json' % self.task_id       
-        with open(task_result_file, 'w') as f:
-            for i, road_path_cluster in enumerate(self.car_road_path_clusters):
-                f.write('%s\r\n' % (sorted(road_path_cluster)))
-
+        similar_roads = []
+        for i, road_path_cluster in enumerate(self.car_road_path_clusters):
+            #f.write('%s\r\n' % (sorted(road_path_cluster)))
+            amount = len(road_path_cluster)
+            if amount > 2:
+                road_path_cluster = sorted(list(road_path_cluster))
+                road_path = self.car_road_paths[road_path_cluster[0]]
+                start_point = road_path[0]
+                end_point = road_path[1]
+                direct_distance = road_path[4]/1000.0
+                similar_amount = amount
+                start_point_data = {'device_lat': start_point[0], 'device_lng': start_point[1], 'device_address': start_point[2], 'device_loctime': start_point[4]}
+                end_point_data = {'device_lat': end_point[0], 'device_lng': end_point[1], 'device_address': end_point[2], 'device_loctime': end_point[4]}
+                similar_road = {'start_point': start_point_data, 'end_point': end_point_data, 'direct_distance': direct_distance, 'similar_amount': similar_amount}
+                similar_roads.append(similar_road)
+        #print('similar roads: ', similar_roads)
+        if len(similar_roads) > 0:
+            task_result_file = '%s/%s/result.json' % (config.data_path, self.task_id)   
+            with open(task_result_file, 'w', encoding='utf8') as f:
+                json.dump(similar_roads, f)
+        else:
+            print('no similar road paths for task id: %s' % self.task_id)
+        
     def calcDistance(self, p1, p2):
         v1 = (p1[0], p1[1])
         v2 = (p2[0], p2[1])
