@@ -24,10 +24,10 @@ def generate_task_id():
 	return task_id
 
 def save_task_data(task_id, task_data):
-	task_path = 'task/%s' % task_id
+	task_path = '../data/%s' % task_id
 	if not os.path.exists(task_path):
 		os.mkdir(task_path)
 	task_json = json.dumps(task_data)
-	with open('%s/%s' % (task_path, 'data.json'), 'w') as f:
+	with open('%s/%s' % (task_path, 'data.json'), 'w', encoding='utf8') as f:
 		f.write(task_json)
 	return True
